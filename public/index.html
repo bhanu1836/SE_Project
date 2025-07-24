@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket Automation Software</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen">
+        <div class="login-container">
+            <div class="login-card">
+                <h1>Supermarket Automation Software</h1>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <div class="demo-credentials">
+                    <h3>Demo Credentials:</h3>
+                    <p><strong>Manager:</strong> manager / manager123</p>
+                    <p><strong>Clerk:</strong> clerk1 / clerk123</p>
+                    <p><strong>Employee:</strong> employee1 / emp123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainScreen" class="screen hidden">
+        <header class="header">
+            <div class="header-content">
+                <h1>SAS Dashboard</h1>
+                <div class="user-info">
+                    <span id="userInfo"></span>
+                    <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="sales">Sales</button>
+            <button class="tab-btn" data-tab="inventory">Inventory</button>
+            <button class="tab-btn manager-only" data-tab="statistics">Statistics</button>
+            <button class="tab-btn manager-only" data-tab="management">Management</button>
+        </nav>
+
+        <!-- Sales Tab -->
+        <div id="salesTab" class="tab-content active">
+            <div class="sales-container">
+                <div class="sales-form">
+                    <h2>New Sale</h2>
+                    <div class="barcode-scanner">
+                        <div class="form-group">
+                            <label for="itemCode">Item Code (Barcode)</label>
+                            <input type="text" id="itemCode" placeholder="Scan or enter item code">
+                            <button id="addItemBtn" class="btn btn-primary">Add Item</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemQuantity">Quantity</label>
+                            <input type="number" id="itemQuantity" min="0.1" step="0.1" value="1">
+                        </div>
+                    </div>
+                    
+                    <div class="cart">
+                        <h3>Cart Items</h3>
+                        <div id="cartItems"></div>
+                        <div class="cart-total">
+                            <strong>Total: ₹<span id="cartTotal">0.00</span></strong>
+                        </div>
+                        <div class="cart-actions">
+                            <button id="clearCartBtn" class="btn btn-secondary">Clear Cart</button>
+                            <button id="checkoutBtn" class="btn btn-success">Checkout & Print Bill</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventoryTab" class="tab-content">
+            <div class="inventory-container">
+                <h2>Inventory Management</h2>
+                <div class="inventory-actions">
+                    <button id="refreshInventoryBtn" class="btn btn-primary">Refresh</button>
+                    <div class="search-box">
+                        <input type="text" id="inventorySearch" placeholder="Search items...">
+                    </div>
+                </div>
+                <div class="inventory-grid">
+                    <div id="inventoryList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab (Manager Only) -->
+        <div id="statisticsTab" class="tab-content">
+            <div class="statistics-container">
+                <h2>Sales Statistics</h2>
+                <div class="date-filter">
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate">
+                    </div>
+                    <button id="generateStatsBtn" class="btn btn-primary">Generate Report</button>
+                </div>
+                <div id="statisticsReport"></div>
+            </div>
+        </div>
+
+        <!-- Management Tab (Manager Only) -->
+        <div id="managementTab" class="tab-content">
+            <div class="management-container">
+                <h2>Price Management</h2>
+                <div class="management-actions">
+                    <button id="refreshPricesBtn" class="btn btn-primary">Refresh</button>
+                </div>
+                <div id="priceManagementList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Print Modal -->
+    <div id="billModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Transaction Bill</h2>
+                <button class="close-btn" onclick="closeBillModal()">&times;</button>
+            </div>
+            <div id="billContent" class="bill-content"></div>
+            <div class="modal-actions">
+                <button onclick="printBill()" class="btn btn-primary">Print</button>
+                <button onclick="closeBillModal()" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Stock Modal -->
+    <div id="stockModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update Stock</h2>
+                <button class="close-btn" onclick="closeStockModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="stockUpdateForm">
+                    <input type="hidden" id="stockItemId">
+                    <div class="form-group">
+                        <label for="stockItemName">Item Name</label>
+                        <input type="text" id="stockItemName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentStock">Current Stock</label>
+                        <input type="number" id="currentStock" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="addStock">Add Stock</label>
+                        <input type="number" id="addStock" min="1" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-success">Update Stock</button>
+                        <button type="button" onclick="closeStockModal()" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Price Modal -->
+    <div id="priceModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Update Price</h2>
+                <button class="close-btn" onclick="closePriceModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="priceUpdateForm">
+                    <input type="hidden" id="priceItemId">
+                    <div class="form-group">
+                        <label for="priceItemName">Item Name</label>
+                        <input type="text" id="priceItemName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentPrice">Current Price (₹)</label>
+                        <input type="number" id="currentPrice" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPrice">New Price (₹)</label>
+                        <input type="number" id="newPrice" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-success">Update Price</button>
+                        <button type="button" onclick="closePriceModal()" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
