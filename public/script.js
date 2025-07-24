@@ -5,7 +5,7 @@ class SupermarketApp {
         this.cart = [];
         this.items = [];
         
-        this.init();
+        this.init(); 
     }
 
     init() {

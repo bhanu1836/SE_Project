@@ -3,17 +3,18 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = 'supermarket_secret_key_2024';
 
-// Middleware
-app.use(express.json());
+// Middleware 
+app.use(express.json()); 
 app.use(express.static('public'));
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/supermarket_db';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 mongoose.connect(MONGODB_URI)
   .then(() => {
@@ -69,18 +70,15 @@ const Transaction = mongoose.model('Transaction', transactionSchema);
 // Initialize default data
 async function initializeData() {
   try {
-    // Check if users exist
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      const users = [
-        { username: 'manager', password: await bcrypt.hash('manager123', 10), role: 'manager', name: 'John Manager' },
-        { username: 'clerk1', password: await bcrypt.hash('clerk123', 10), role: 'clerk', name: 'Alice Clerk' },
-        { username: 'employee1', password: await bcrypt.hash('emp123', 10), role: 'employee', name: 'Bob Employee' }
-      ];
-      
-      await User.insertMany(users);
-      console.log('Default users created');
-    }
+    // Always reset users to predefined credentials (for demo/testing)
+    await User.deleteMany({});
+    const users = [
+      { username: 'manager', password: await bcrypt.hash('manager123', 10), role: 'manager', name: 'John Manager' },
+      { username: 'clerk1', password: await bcrypt.hash('clerk123', 10), role: 'clerk', name: 'Alice Clerk' },
+      { username: 'employee1', password: await bcrypt.hash('emp123', 10), role: 'employee', name: 'Bob Employee' }
+    ];
+    await User.insertMany(users);
+    console.log('Default users created');
 
     // Check if items exist
     const itemCount = await Item.countDocuments();
